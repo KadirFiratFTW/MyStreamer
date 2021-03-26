@@ -1,0 +1,50 @@
+{
+  "manifest_version": 2,
+  "name": "My Streamer",
+  "description": "This extension gives you notified from your favourite streamers on Twitch when they gone live.",
+  "version": "1.0",
+  "author": "Kadir FIRAT a.k.a BenKF",
+  "background": {
+    "scripts": [
+      "background.js"
+    ],
+    "persistent": true
+  },
+  "page_action": {
+    "default_popup": "index.html",
+    "default_icon": {
+      "16": "images/streamer-16.png",
+      "32": "images/streamer-32.png",
+      "48": "images/streamer-48.png",
+      "128": "images/streamer-128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "jquery-3.3.1.js",
+        "content.js"
+      ]
+    }
+  ],
+  "icons": {
+    "16": "images/streamer-16.png",
+    "32": "images/streamer-32.png",
+    "48": "images/streamer-48.png",
+    "128": "images/streamer-128.png"
+  },
+  "permissions": [
+    "storage",
+    "unlimitedStorage",
+    "activeTab",
+    "declarativeContent",
+    "webRequest"
+  ],
+  "page_action": {
+    "default_title": "My Streamer",
+    "default_popup": "index.html"
+  }
+}
