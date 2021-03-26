@@ -1,2 +1,3 @@
 # MyStreamer
-Twitch Stream Notifier
+
+Twitch üzerinde takip ettiğiniz favori yayıncılarınızı sizin yerinize takip eder.
