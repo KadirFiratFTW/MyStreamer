@@ -4,25 +4,6 @@ chrome.runtime.onInstalled.addListener(function () {
   });
 });
 
-chrome.declarativeContent.onPageChanged.removeRules(undefined, function () {
-
-  chrome.declarativeContent.onPageChanged.addRules([{
-    conditions: [new chrome.declarativeContent.PageStateMatcher()
-    ],
-    actions: [new chrome.declarativeContent.ShowPageAction()]
-  }]);
-
-
-});
-
-
-var rxGoogleSearch = /^https?:\/\/(www\.)?google\.(com|\w\w(\.\w\w)?)\/.*?[?#&]q=/;
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
-  if (rxGoogleSearch.test(changeInfo.url)) {
-    chrome.tabs.sendMessage(tabId, 'url-update');
-  }
-})
-
 async function postData(url = '', type, pass = "") {
   const xhr = new XMLHttpRequest();
   xhr.open('GET', url, true);
@@ -39,8 +20,6 @@ function ResponseHandler(resp, type, pass) {
     const ParseText = JSON.parse(resp.responseText);
 
     UpdateStreamer(ParseText.users[0].name, ParseText.users[0].logo, "logo");
-
-
     postData('https://api.twitch.tv/kraken/streams/' + ParseText.users[0]._id, 1, ParseText.users[0].name)
 
   } else {
