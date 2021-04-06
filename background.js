@@ -1,5 +1,5 @@
 chrome.runtime.onInstalled.addListener(function () {
-  chrome.storage.local.set({ alerts: true, streamers: [] }, function () {});
+  chrome.storage.local.set({ alerts: true, streamers: [] }, function () { });
 });
 
 async function postData(url = '', type, pass = "") {
@@ -17,7 +17,7 @@ function ResponseHandler(resp, type, pass) {
     if (resp.status !== 200) return; // or whatever error handling you want
     const ParseText = JSON.parse(resp.responseText);
 
-    UpdateStreamerLogo(ParseText.users[0].name, ParseText.users[0].logo);
+    UpdateStreamerLogo(ParseText.users[0].name, ParseText.users[0].logo, ParseText.users[0]._id);
     postData('https://api.twitch.tv/kraken/streams/' + ParseText.users[0]._id, 1, ParseText.users[0].name)
 
   } else {
@@ -39,11 +39,15 @@ setInterval(function () {
   chrome.storage.local.get('streamers', function (data) {
 
     data.streamers.forEach(S => {
+      if (S.logoFetched) {
+        postData('https://api.twitch.tv/kraken/streams/' + S._id, 1, S.name)
+        return;
+      }
       postData('https://api.twitch.tv/kraken/users?login=' + S.name, 0)
     })
   });
 
-}, 1000);
+}, 2500);
 
 function UpdateStreamer(name, status) {
   chrome.storage.local.get('streamers', function (data) {
@@ -51,23 +55,19 @@ function UpdateStreamer(name, status) {
     let Str = Streamers.find(S => S.name == name);
     if (!Str) { return; }
     if (Str.status && !Str.notified) {
-      console.log("a", Str.status, Str.notified)
       Str.notified = true;
-      console.log("b", Str.status, Str.notified)
       Sounds.play();
       chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (!tabs.length) return;
 
         chrome.tabs.sendMessage(tabs[0].id, { command: "notify", streamer: Str }, function (response) {
           if (window.chrome.runtime.lastError) return;
-          chrome.storage.local.set({ 'streamers': Streamers }, function () {
-          });
         });
       });
     }
 
     Str["status"] = status;
-    if (Str["status"] !== status) {
+    if (Str["status"] !== status && status !== false) {
       Str.notified = false;
     }
     chrome.storage.local.set({ 'streamers': Streamers }, function () {
@@ -75,14 +75,15 @@ function UpdateStreamer(name, status) {
   });
 }
 
-function UpdateStreamerLogo(name, status) {
+function UpdateStreamerLogo(name, status, sid) {
   chrome.storage.local.get('streamers', function (data) {
     let Streamers = [...data.streamers];
     let Str = Streamers.find(S => S.name == name);
     if (!Str) { return; }
 
     Str["logo"] = status;
-
+    Str["logoFetched"] = true;
+    Str["_id"] = sid;
     chrome.storage.local.set({ 'streamers': Streamers }, function () {
     });
   });
